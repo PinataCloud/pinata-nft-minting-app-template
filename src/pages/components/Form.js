@@ -34,9 +34,9 @@ const Form = () => {
 
   const handleSubmission = async () => {
     let key;
-    let hash;
-    let uri
     let keyId;
+    let fileCID;
+    let uri
 
     try {
       setIsLoading(true)
@@ -77,7 +77,7 @@ const Form = () => {
           body: formData
         })
         const uploadResJson = await uploadRes.json()
-        hash = uploadResJson.IpfsHash
+        fileCID = uploadResJson.IpfsHash
       } catch (error) {
         console.log("Error uploading file:", error)
       }
@@ -86,7 +86,7 @@ const Form = () => {
         const jsonData = JSON.stringify({
           name: name,
           description: description,
-          image: process.env.NEXT_PUBLIC_PINATA_DEDICATED_GATEWAY + hash,
+          image: process.env.NEXT_PUBLIC_PINATA_DEDICATED_GATEWAY + fileCID,
           external_url: externalURL
         })
 
