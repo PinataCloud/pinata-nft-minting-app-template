@@ -33,88 +33,113 @@ const Form = () => {
   }
 
   const handleSubmission = async () => {
-    setIsLoading(true)
-    const tempKey = await fetch("/api/key", {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    const tempKeyJson = await tempKey.json()
-    const key = tempKeyJson.JWT
-    const formData = new FormData()
-
-    formData.append('file', selectedFile, { filepath: selectedFile.name })
-
-    const metadata = JSON.stringify({
-      name: `${selectedFile.name}`,
-    })
-    formData.append('pinataMetadata', metadata)
-
-    const options = JSON.stringify({
-      cidVersion: 0,
-    })
-    formData.append('pinataOptions', options)
+    let key;
+    let hash;
+    let uri
+    let keyId;
 
     try {
-      setMessage("Uploading File...")
-      const uploadRes = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${key}`,
-        },
-        body: formData
-      })
-      const uploadResJson = await uploadRes.json()
-      const hash = uploadResJson.IpfsHash
+      setIsLoading(true)
+      try {
+        const tempKey = await fetch("/api/key", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        const tempKeyJson = await tempKey.json()
+        key = tempKeyJson.JWT
+        keyId = tempKeyJson.pinata_api_key
+      } catch (error) {
+        console.log("error making API key:", error)
+      }
 
-      const jsonData = JSON.stringify({
-        name: name,
-        description: description,
-        image: `${process.env.NEXT_PUBLIC_PINATA_DEDICATED_GATEWAY + hash}`,
-        external_url: externalURL
-      })
+      try {
+        const formData = new FormData()
+        formData.append('file', selectedFile, { filepath: selectedFile.name })
 
-      setMessage("Uploading Metadata...")
+        const metadata = JSON.stringify({
+          name: `${selectedFile.name}`,
+        })
+        formData.append('pinataMetadata', metadata)
 
-      const jsonRes = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${key}`,
-        },
-        body: jsonData
-      })
-      const jsonResData = await jsonRes.json()
-      const uri = jsonResData.IpfsHash
+        const options = JSON.stringify({
+          cidVersion: 0,
+        })
+        formData.append('pinataOptions', options)
 
-      const mintBody = JSON.stringify({
-        address: address,
-        uri: `https://discordpinnie.mypinata.cloud/ipfs/${uri}`
-      })
+        setMessage("Uploading File...")
+        const uploadRes = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${key}`,
+          },
+          body: formData
+        })
+        const uploadResJson = await uploadRes.json()
+        hash = uploadResJson.IpfsHash
+      } catch (error) {
+        console.log("Error uploading file:", error)
+      }
 
-      setMessage("Minting NFT...")
-      const mintRes = await fetch("/api/mint", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: mintBody
-      })
-      const mintResData = await mintRes.json()
-      console.log(mintResData)
-      setOsLink(`https://opensea.io/assets/matic/${mintResData.onChain.contractAddress}/${mintResData.onChain.tokenId}`)
+      try {
+        const jsonData = JSON.stringify({
+          name: name,
+          description: description,
+          image: process.env.NEXT_PUBLIC_PINATA_DEDICATED_GATEWAY + hash,
+          external_url: externalURL
+        })
 
-      const deleteData = JSON.stringify({
-        apiKey: tempKeyJson.pinata_api_key,
-      })
-      const deleteKey = await fetch("/api/key", {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: deleteData
-      })
+        setMessage("Uploading Metadata...")
+
+        const jsonRes = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${key}`,
+          },
+          body: jsonData
+        })
+        const jsonResData = await jsonRes.json()
+        uri = jsonResData.IpfsHash
+      } catch (error) {
+        console.log("Error uploading metadata:", error)
+      }
+
+      try {
+        const mintBody = JSON.stringify({
+          address: address,
+          uri: process.env.NEXT_PUBLIC_PINATA_DEDICATED_GATEWAY + uri,
+        })
+
+        setMessage("Minting NFT...")
+        const mintRes = await fetch("/api/mint", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: mintBody
+        })
+        const mintResData = await mintRes.json()
+        setOsLink(`https://opensea.io/assets/matic/${mintResData.onChain.contractAddress}/${mintResData.onChain.tokenId}`)
+      } catch (error) {
+        console.log("Error minting NFT:", error)
+      }
+
+      try {
+        const deleteData = JSON.stringify({
+          apiKey: keyId,
+        })
+        const deleteKey = await fetch("/api/key", {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: deleteData
+        })
+      } catch (error) {
+        console.log("Error deleting API key:", error)
+      }
       setMessage("Minting Complete!")
       setIsLoading(false)
       setIsComplete(true)
