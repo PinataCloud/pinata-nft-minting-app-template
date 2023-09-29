@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
     if (mintResJson.onChain.status === "pending") {
       while (true) {
-        delay(8000)
+        await delay(8000)
 
         const mintStatus = await fetch(`https://www.crossmint.com/api/2022-06-09/collections/${process.env.CROSSMINT_COLLECTION_ID}/nfts/${mintResJson.id}`, {
           method: 'GET',
