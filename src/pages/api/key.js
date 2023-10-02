@@ -10,7 +10,12 @@ export default async function handler(req, res) {
       const body = JSON.stringify({
         keyName: uuid.toString(),
         permissions: {
-          admin: true
+          endpoints: {
+            pinning: {
+              pinFileToIPFS: true,
+              pinJSONToIPFS: true,
+            }
+          }
         },
         maxUses: 2
       })
