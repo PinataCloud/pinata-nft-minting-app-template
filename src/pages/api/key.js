@@ -29,7 +29,11 @@ export default async function handler(req, res) {
         }
       })
       const keyResJson = await keyRes.json()
-      return res.send(keyResJson)
+      const keyData = {
+        pinata_api_key: keyResJson.pinata_api_key,
+        JWT: keyResJson.JWT
+      }
+      return res.send(keyData)
 
     } catch (error) {
       console.log(error.message)
@@ -37,9 +41,10 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "PUT") {
     try {
+      const body = JSON.stringify(req.body)
       const keyDelete = await fetch('https://api.pinata.cloud/users/revokeApiKey', {
         method: 'PUT',
-        body: req.body.deleteData,
+        body: body,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',

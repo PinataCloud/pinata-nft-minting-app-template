@@ -47,9 +47,9 @@ const Form = () => {
             'Content-Type': 'application/json'
           }
         })
-        const tempKeyJson = await tempKey.json()
-        key = tempKeyJson.JWT
-        keyId = tempKeyJson.pinata_api_key
+        const keyData = await tempKey.json()
+        key = keyData.JWT
+        keyId = keyData.pinata_api_key
       } catch (error) {
         console.log("error making API key:", error)
       }
