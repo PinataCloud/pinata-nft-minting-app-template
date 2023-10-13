@@ -8,17 +8,15 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import {
-  polygon
+  base
 } from 'wagmi/chains';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 
 
 
 const { chains, publicClient } = configureChains(
-  [polygon],
+  [base],
   [
-    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY }),
     publicProvider()
   ]
 );
@@ -49,7 +47,7 @@ export default function App({ Component, pageProps }) {
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider
             chains={chains}
-            initialChain={polygon}
+            initialChain={base}
             theme={darkTheme({
               accentColor: "#5F61EA",
               accentColorForeground: 'white',

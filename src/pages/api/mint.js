@@ -4,7 +4,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export default async function handler(req, res) {
   try {
     const data = JSON.stringify({
-      recipient: `polygon:${req.body.address}`,
+      recipient: `base:${req.body.address}`,
       metadata: req.body.uri,
     })
 

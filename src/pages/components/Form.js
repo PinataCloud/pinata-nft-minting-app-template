@@ -121,7 +121,7 @@ const Form = () => {
           body: mintBody
         })
         const mintResData = await mintRes.json()
-        setOsLink(`https://opensea.io/assets/matic/${mintResData.onChain.contractAddress}/${mintResData.onChain.tokenId}`)
+        setOsLink(`https://opensea.io/assets/base/${mintResData.onChain.contractAddress}/${mintResData.onChain.tokenId}`)
       } catch (error) {
         console.log("Error minting NFT:", error)
       }
